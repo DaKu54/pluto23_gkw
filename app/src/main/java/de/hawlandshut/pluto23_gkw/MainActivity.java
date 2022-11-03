@@ -1,9 +1,15 @@
 package de.hawlandshut.pluto23_gkw;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,30 +25,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Intent intent = new Intent(getApplication(), CreateAccountActivity.class);
+        startActivity(intent);
         Log.d(TAG,"onStart called");
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG,"onResume called");
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate( R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d(TAG,"onPause called");
-    }
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch ( item.getItemId() ){
+            case R.id.menu_main_test1:
+                Toast.makeText(getApplicationContext(), "You pressed Test 1", Toast.LENGTH_LONG).show();
+                return true;
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG,"onStop called");
-    }
+            case R.id.menu_main_test2:
+                Toast.makeText(getApplicationContext(), "You pressed Test 2", Toast.LENGTH_LONG).show();
+                return true;
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d(TAG,"onRestart called");
+            case R.id.menu_main_test3:
+                Toast.makeText(getApplicationContext(), "You pressed Test 3", Toast.LENGTH_LONG).show();
+                return true;
+        }
+        return true;
     }
 }

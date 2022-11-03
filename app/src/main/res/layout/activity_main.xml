@@ -8,36 +8,5 @@
     tools:context=".MainActivity">
 <!-- Commentar -->
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Hello new World!"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="#3949AB"></TextView>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Zweite Zeile">
-    </TextView>
-
-    <EditText
-        android:id="@+id/editTextNumberPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="numberPassword" />
-
-    <Button
-        android:id="@+id/button"
-        android:layout_margin="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/register" />
-
-    <CalendarView
-        android:id="@+id/calendarView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
 </LinearLayout>
