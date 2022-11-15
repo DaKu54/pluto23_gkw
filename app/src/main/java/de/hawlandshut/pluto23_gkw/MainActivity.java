@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Intent intent = new Intent(getApplication(), PostActivity.class);
+        Intent intent = new Intent(getApplication(), ManageAccountActivity.class);
         startActivity(intent);
         Log.d(TAG,"onStart called");
     }
