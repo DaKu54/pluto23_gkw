@@ -3,11 +3,6 @@ package de.hawlandshut.pluto23_gkw;
 import static de.hawlandshut.pluto23_gkw.Testdata.Testdata.TEST_MAIL;
 import static de.hawlandshut.pluto23_gkw.Testdata.Testdata.TEST_PASSWORD;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +10,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -32,32 +32,41 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(TAG,"onCreate called");
+        Log.d(TAG, "onCreate called");
 
         mAdapter = new CustomAdapter();
-        mRecyclerView = findViewById( R.id.main_recycler_view );
-        mRecyclerView.setLayoutManager( new LinearLayoutManager( this ));
-        mRecyclerView.setAdapter( mAdapter );
+        mRecyclerView = findViewById(R.id.main_recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        //Intent intent = new Intent(getApplication(), CreateAccountActivity.class);
-        //startActivity(intent);
-        Log.d(TAG,"onStart called");
+        FirebaseUser user =  FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null) { // Falls kein User angemeldet gehe zu SignIn
+            Log.d(TAG, "No user - going to SignIn");
+            Intent intent = new Intent(getApplication(), SignInActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate( R.menu.menu_main, menu);
+        inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch ( item.getItemId() ){
+        switch (item.getItemId()) {
+            case R.id.menu_main_manage_account:
+                Intent intent = new Intent(getApplication(), ManageAccountActivity.class);
+                startActivity(intent);
+                return true;
+
             case R.id.menu_main_test_auth_status:
                 doTestAuthStatus();
                 return true;
@@ -85,40 +94,80 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_main_send_verification_mail:
                 doSendVerificationMail();
                 return true;
-                
+
         }
         return true;
     }
 
     private void doSendVerificationMail() {
+        FirebaseUser user;
+        String msg;
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            msg = "No user logged in";
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+        } else {
+            user.sendEmailVerification()
+            .addOnCompleteListener(this,
+                    new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            String msg;
+                            if (task.isSuccessful()) {
+                                msg = "Mail sent.";
+                                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                            } else {
+                                String error = task.getException().getMessage();
+                                msg = "Failed (" + error + ")";
+                                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                            }
+
+                        }
+                    });
+        }
     }
 
     private void doSendPasswordResetMail() {
+        FirebaseAuth.getInstance().sendPasswordResetEmail(
+                        TEST_MAIL)
+                .addOnCompleteListener(this,
+                        new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                String msg;
+                                if (task.isSuccessful()) {
+                                    msg = "E-Mail sent.";
+                                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                                } else {
+                                    String error = task.getException().getMessage();
+                                    msg = "Failed (" + error + ")";
+                                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
     }
 
     private void doDeleteUser() {
         FirebaseUser user;
         String msg;
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null){
-            msg ="No user logged in";
+        if (user == null) {
+            msg = "No user logged in";
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
-        }
-        else {
+        } else {
             user.delete().addOnCompleteListener(this,
                     new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             String msg;
-                            if( task.isSuccessful()){
+                            if (task.isSuccessful()) {
                                 msg = "User deleted.";
-                                Toast.makeText( getApplicationContext(), msg, Toast.LENGTH_LONG ).show();
+                                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
 
-                            }
-                            else {
+                            } else {
                                 String error = task.getException().getMessage();
-                                msg = "Deletion failed (" + error +")";
-                                Toast.makeText( getApplicationContext(), msg, Toast.LENGTH_LONG ).show();
+                                msg = "Deletion failed (" + error + ")";
+                                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                             }
                         }
                     });
@@ -126,7 +175,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void doSignIn() {
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(
+                        TEST_MAIL, TEST_PASSWORD)
+                .addOnCompleteListener(this,
+                        new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                String msg;
+                                if (task.isSuccessful()) {
+                                    msg = "User signed in.";
+                                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                                } else {
+                                    String error = task.getException().getMessage();
+                                    msg = "Failed (" + error + ")";
+                                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                                }
+
+                            }
+                        });
+
     }
+
 
     private void doSignOut() {
         FirebaseUser user;
@@ -146,40 +215,35 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user;
         String msg;
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null){
+        if (user == null) {
             msg = "No user signed in.";
-            Toast.makeText( getApplicationContext(), msg, Toast.LENGTH_LONG ).show();
-        }
-        else {
-            msg = "User: " + user.getEmail();
-            Toast.makeText( getApplicationContext(), msg, Toast.LENGTH_LONG ).show();
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+        } else {
+            msg = "User: " + user.getEmail() + " (" + user.isEmailVerified() + ")";
+            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
         }
     }
-    
-    
+
+
     private void doCreateTestUser() {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(
-                TEST_MAIL, TEST_PASSWORD)
+                        TEST_MAIL, TEST_PASSWORD)
                 .addOnCompleteListener(this,
                         new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 String msg;
-                               if( task.isSuccessful()){
-                                   msg = "User created.";
-                                   Toast.makeText( getApplicationContext(), msg, Toast.LENGTH_LONG ).show();
-
-                               }
-                               else {
+                                if (task.isSuccessful()) {
+                                    msg = "User created.";
+                                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                                } else {
                                     String error = task.getException().getMessage();
-                                    msg = "Failed (" + error +")";
-                                   Toast.makeText( getApplicationContext(), msg, Toast.LENGTH_LONG ).show();
-                               }
+                                    msg = "Failed (" + error + ")";
+                                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                                }
 
                             }
                         });
 
     }
-
-
 }
