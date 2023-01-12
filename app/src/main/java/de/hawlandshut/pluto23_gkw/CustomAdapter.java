@@ -17,7 +17,8 @@ import de.hawlandshut.pluto23_gkw.model.Post;
 public class CustomAdapter extends RecyclerView.Adapter<CustomViewHolder> {
 
     private static final String TAG = "xx CustomAdapter";
-    ArrayList<Post> mPostList = createPostList();
+    // Mit leerer Liste initialisieren;
+    ArrayList<Post> mPostList = new ArrayList<Post>();
     int c = 0;
     @NonNull
     @Override

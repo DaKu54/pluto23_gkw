@@ -24,9 +24,7 @@ public class ManageAccountActivity extends AppCompatActivity implements View.OnC
     Button mButtonSignOut;
     Button mButtonSendActivationMail;
     Button mButtonDeleteAccount;
-
     EditText mEditTextPassword;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +51,7 @@ public class ManageAccountActivity extends AppCompatActivity implements View.OnC
         mTextViewAccountVerified.setText("Account verified : " + user.isEmailVerified());
         mTextViewId.setText("Technical Id : " + user.getUid());
 
-    }
+     }
 
     @Override
     public void onClick(View view) {

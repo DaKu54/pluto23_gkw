@@ -60,7 +60,6 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         password = mCreateAccountPassword.getText().toString();
         password1 = mCreateAccountPassword1.getText().toString();
 
-
         if (!password1.equals( password )){
             String msg = "Passwords do not match";
             Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
@@ -91,10 +90,8 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                                     msg = "Failed (" + error + ")";
                                     Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                                 }
-
                             }
                         });
-
     }
 
 }

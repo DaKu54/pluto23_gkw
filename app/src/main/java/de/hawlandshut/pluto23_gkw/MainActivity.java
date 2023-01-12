@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,12 +22,23 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import de.hawlandshut.pluto23_gkw.model.Post;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "xx MainActivity";
     CustomAdapter mAdapter;
     RecyclerView mRecyclerView;
+
+    ListenerRegistration mListenerRegistration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +61,36 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "No user - going to SignIn");
             Intent intent = new Intent(getApplication(), SignInActivity.class);
             startActivity(intent);
+            if (mListenerRegistration != null) {
+                mListenerRegistration.remove();
+                mListenerRegistration=null;
+            }
+        } else {
+            if (mListenerRegistration == null)
+                mListenerRegistration = getQueryListener();
         }
+    }
+
+    ListenerRegistration getQueryListener(){
+        // Abfrage
+        Query query = FirebaseFirestore.getInstance()
+                .collection("posts")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(10);
+        return query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshot, @Nullable FirebaseFirestoreException error) {
+                mAdapter.mPostList.clear(); // List im Adapter leeren
+
+                // Nun Liste neu aufbauen
+                // laufe dazu durch alle Dokumente im snapshot
+                for (QueryDocumentSnapshot doc : snapshot){
+                    Post receivedPost = Post.fromDocument( doc );
+                    mAdapter.mPostList.add( receivedPost );
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -61,39 +102,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.menu_main_manage_account:
-                Intent intent = new Intent(getApplication(), ManageAccountActivity.class);
+                intent = new Intent(getApplication(), ManageAccountActivity.class);
                 startActivity(intent);
                 return true;
 
-            case R.id.menu_main_test_auth_status:
-                doTestAuthStatus();
+            case R.id.menu_main_post:
+                intent = new Intent(getApplication(), PostActivity.class);
+                startActivity(intent);
                 return true;
 
-            case R.id.menu_main_create_test_user:
-                doCreateTestUser();
-                return true;
-
-            case R.id.menu_main_sign_out:
-                doSignOut();
-                return true;
-
-            case R.id.menu_main_sign_in:
-                doSignIn();
-                return true;
-
-            case R.id.menu_main_delete_user:
-                doDeleteUser();
-                return true;
-
-            case R.id.menu_main_send_password_reset_mail:
-                doSendPasswordResetMail();
-                return true;
-
-            case R.id.menu_main_send_verification_mail:
-                doSendVerificationMail();
-                return true;
+            case R.id.menu_main_crash:
+                throw new RuntimeException("Test Crash");
 
         }
         return true;
